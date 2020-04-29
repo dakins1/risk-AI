@@ -24,6 +24,7 @@ import net.yura.domination.engine.core.RiskGame;
 import net.yura.domination.engine.core.StatType;
 import net.yura.domination.engine.core.Statistic;
 
+import net.yura.domination.engine.ai.logic.AIHeuristic;
 /**
  * @author Steven Hawkins
  *
@@ -161,6 +162,8 @@ public class AIDomination extends AISubmissive {
 	}
 
 	public String getPlaceArmies() {
+		AIHeuristic heuristic = new AIHeuristic(this.game, this.player);
+		heuristic.getRating();
 		if (((this.type == AIDomination.PLAYER_AI_EASY && game.NoEmptyCountries() && r.nextInt(6) != 0) //mostly random placement
 				|| (game.getSetupDone() && this.type == AIDomination.PLAYER_AI_AVERAGE && r.nextBoolean()))) { //use a random placement half of the time to make the player less aggressive
 			return simplePlacement();

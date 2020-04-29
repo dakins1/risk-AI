@@ -95,7 +95,7 @@
 
 		<!-- compile the classes -->
 		<javac debug="on" srcdir="${dir.sources}" destdir="${dir.build.classes}"
-		source="1.5" target="1.5" classpath="${dir.libs}" encoding="Cp1252"/>
+		source="1.6" target="1.6" classpath="${dir.libs}" encoding="Cp1252" includeantruntime="false"/>
 
                 <!-- copy translation files and other shared files -->
 		<copy todir="${dir.build.classes}" filtering="true">
@@ -437,7 +437,7 @@ svn co https://lobby.svn.sourceforge.net/svnroot/lobby/trunk
 		<mkdir dir="${dir.build.lobby.client.classes}"/>
 
 		<javac debug="on" srcdir="${dir.sources}" destdir="${dir.build.lobby.client.classes}" includes="net/yura/domination/lobby/client/**,net/yura/domination/engine/ai/**"
-		source="1.5" target="1.5" classpath="${dir.libs}" encoding="Cp1252"/>
+		source="1.6" target="1.6" classpath="${dir.libs}" encoding="Cp1252"/>
 
                 <!-- copy translation files and other shared files -->
 		<copy todir="${dir.build.lobby.client.classes}" filtering="true">
@@ -465,7 +465,7 @@ svn co https://lobby.svn.sourceforge.net/svnroot/lobby/trunk
 		<mkdir dir="${dir.build.lobby.server.classes}"/>
 
 		<javac debug="on" srcdir="src:src_lobbyserver:src_mapstore" destdir="${dir.build.lobby.server.classes}" includes="net/yura/domination/lobby/server/**,net/yura/domination/engine/ai/**"
-		source="1.5" target="1.5" classpath="lib/LobbyServer.jar:lib/SwingME.jar:lib/midletrunner.jar" encoding="Cp1252"/>
+		source="1.6" target="1.6" classpath="lib/LobbyServer.jar:lib/SwingME.jar:lib/midletrunner.jar" encoding="Cp1252"/>
 
                 <!-- copy translation files and other shared files -->
 		<copy todir="${dir.build.lobby.server.classes}" filtering="true">
@@ -568,7 +568,7 @@ svn co https://lobby.svn.sourceforge.net/svnroot/lobby/trunk
         <mkdir dir="dist"/>
 
         <javac debug="on" srcdir="src:src_android:src_mapstore" destdir="${dir.build}/swingme" excludes="net/yura/domination/android/**"
-        source="1.5" target="1.5" classpath="${dir.libs}" encoding="Cp1252"/>
+        source="1.6" target="1.6" classpath="${dir.libs}" encoding="Cp1252" includeantruntime = "false" />
 
         <copy todir="${dir.build}/swingme">
                 <fileset dir="res_android" includes="**/*.*" excludes="**/*.ini"/>
@@ -615,7 +615,7 @@ svn co https://lobby.svn.sourceforge.net/svnroot/lobby/trunk
 
 
     <target name="run" depends="game" description="override default run action of netbeans">
-        <java dir="${dir.build.game}" fork="true" jar="${dir.build.game}/${game.name}.jar"/>
+        <java dir="${dir.build.game}" fork = "true" jar="${dir.build.game}/${game.name}.jar"/>
     </target>
 
 

@@ -3,6 +3,8 @@
 package net.yura.domination.engine.core;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -178,6 +180,26 @@ public class RiskGame implements Serializable { // transient
 
 		r = new Random();
 	}
+	
+   public RiskGame deepCopy() throws Exception
+    {
+        //Serialization of object
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(bos);
+        out.writeObject(this);
+ 
+        //De-serialization of object
+        ByteArrayInputStream bis = new   ByteArrayInputStream(bos.toByteArray());
+        ObjectInputStream in = new ObjectInputStream(bis);
+        RiskGame  copied = (RiskGame) in.readObject();
+ 
+        //Verify that object is not corrupt
+ 
+        //validateNameParts(fName);
+        //validateNameParts(lName);
+ 
+        return copied;
+    }	
 
 	public void addCommand(String a) {
 
