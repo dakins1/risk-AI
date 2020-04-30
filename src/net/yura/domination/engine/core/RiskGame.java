@@ -949,7 +949,7 @@ public class RiskGame implements Serializable { // transient
 	 * 
 	 * @param t1 Attacking country
 	 * @param t2 Defending country
-	 * @return int[] Returns an array which determines if the player is allowed to
+	 * @return boolean Returns a bool which determines if the player is allowed to
 	 *         roll dice
 	 */
 	public boolean attack(Country t1, Country t2) {
@@ -2359,6 +2359,10 @@ public class RiskGame implements Serializable { // transient
 		return currentPlayer;
 	}
 
+	public void setCurrentPlayer(Player p) {
+		currentPlayer = p;
+	}
+	
 	/**
 	 * Gets all the players
 	 * 

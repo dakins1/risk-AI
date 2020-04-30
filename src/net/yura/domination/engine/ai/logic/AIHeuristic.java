@@ -34,6 +34,7 @@ public class AIHeuristic {
 	public AIHeuristic(RiskGame game, Player player) {
 		this.game = game;
 		this.player = player;
+		
 	}
 	
 	int getRating() {
