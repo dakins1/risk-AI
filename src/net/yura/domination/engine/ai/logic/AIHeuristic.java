@@ -22,10 +22,12 @@ public class AIHeuristic {
 	//		dense troops rather than multiple territories with thin troops. Maybe divide entire score by number of 
 	//		territories? But as it is now, owning continents with strong borders hold the biggest rewards, so maybe 
 	//		this won't be necessary 
+	// TODO card rating balancing?
 	
 	int ownedBorderScale = 3;
 	int borderScale = 2;
 	int ownedContinentExp = 2;
+	int cardScale = 4;
 	RiskGame game;
 	Player player;
 	
@@ -40,6 +42,7 @@ public class AIHeuristic {
 		total += continentOwnershipRating();
 		total += ownedBorderStrengthRating();
 		total += borderStrengthRating();
+		total += cardRating();
 		return total;
 	}
 	
@@ -59,7 +62,7 @@ public class AIHeuristic {
 	}
 	
 	//Borders of owned continents should be heavily protected
-	@SuppressWarnings("unchecked")	
+	@SuppressWarnings("unchecked") 
 	int ownedBorderStrengthRating() {
 		int rating = 0;
 		for (Continent c : game.getContinents()) {
@@ -96,4 +99,7 @@ public class AIHeuristic {
 		return rating;
 	}
 
+	int cardRating() {
+		return player.getCards().size() * cardScale;
+	}
 }
