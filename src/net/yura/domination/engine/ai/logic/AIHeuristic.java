@@ -15,55 +15,85 @@ import net.yura.domination.engine.core.Statistic;
 
 public class AIHeuristic {
 	
-	RiskGame game;
+	// TODO possible give regular troops within owned continents more points than regular troops on un-owned continents? 
+	//		maybe not, since that kind of punishes expansion 
+	// TODO make sure to test - owning and not owning a continent (use load game)
+	// TODO we need some way of balancing owning territories vs. troop density, e.g. better to own a few countries with
+	//		dense troops rather than multiple territories with thin troops. Maybe divide entire score by number of 
+	//		territories? But as it is now, owning continents with strong borders hold the biggest rewards, so maybe 
+	//		this won't be necessary 
 	
+	int ownedBorderScale = 3;
+	int borderScale = 2;
+	int ownedContinentExp = 2;
+	RiskGame game;
 	Player player;
 	
 	public AIHeuristic(RiskGame game, Player player) {
-		
 		this.game = game;
 		this.player = player;
-		
 	}
 	
 	int getRating() {
-		getBorderCountriesInContinent();
-		return this.player.getNoTerritoriesOwned();
+		int total = 0;
+		total += player.getNoTerritoriesOwned();
+		total += continentOwnershipRating();
+		total += ownedBorderStrengthRating();
+		total += borderStrengthRating();
+		return total;
 	}
 	
-	int getBorderCountriesInContinent() {
-		
+	int continentOwnershipRating() {
+		int rating = 0;
 		for (Continent c : game.getContinents()) {
-			
-			Vector<Country> borderCountries;
-			Player owner;
-			
-			borderCountries = c.getBorderCountries();
-			owner = c.getOwner();
-			RiskGame copy = null;
-			try {
-				copy = game.deepCopy();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if (c.isOwned(player)) {
+				//Exponentiate the value to make different continent values stand out more in heuristic
+				int val = c.getArmyValue();
+				for (int i=1; i<=ownedContinentExp; i++) {
+					val *= c.getArmyValue();
+				}
+				rating += val;
 			}
-			System.out.println(copy);
-			copy.getCountries()[0].addArmies(32);
-			System.out.println("GAME: " + game.getCountries()[0].getArmies());
-			System.out.println("COPY: " + copy.getCountries()[0].getArmies());
-			
-			
-			if (c.isOwned(this.player)) {
-				
-				int value = c.getArmyValue()*c.getArmyValue();
-				
-			}
-			
 		}
-		
-		
-		return 0;
+		return rating;
 	}
 	
+	//Borders of owned continents should be heavily protected
+	@SuppressWarnings("unchecked")	
+	int ownedBorderStrengthRating() {
+		int rating = 0;
+		for (Continent c : game.getContinents()) {
+			if (c.isOwned(player)) {
+				//Returns a vector of the edge countries w/in that continent
+				//e.g., North America has border countries Alaska, Greenland, and Central America
+				for (Country ct : (Vector<Country>) c.getBorderCountries()) {
+					rating += ct.getArmies()*ownedBorderScale;
+				}
+			}
+		}
+		return rating;
+	}
+	
+	//Strong borders are still important, even if we don't yet own the continent
+	@SuppressWarnings("unchecked")
+	int borderStrengthRating() {
+		int rating = 0;
+		for (Continent c : game.getContinents()) {
+			for (Country ct : (Vector<Country>) c.getBorderCountries()) {
+				if (ct.getOwner() == player) rating += ct.getArmies()*borderScale;
+			}
+		}
+		return rating;
+	}
+	
+	//Since this goes through all owned countries, it will re-count the troops in border countries.
+	//I'm guessing this shouldn't matter since the total score only matters in relation to other scores. 
+	int genericTroopRating() {
+		int rating = 0;
+		for (Country ct : game.getCountries()) {
+			if (ct.getOwner() == player) rating += ct.getArmies();
+		}
+		return rating;
+	}
 
 }
