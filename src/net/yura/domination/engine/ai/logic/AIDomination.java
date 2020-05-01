@@ -2072,7 +2072,7 @@ public class AIDomination extends AISubmissive {
 
 	public String getAttack() {
 		AIMonteCarlo ai = new AIMonteCarlo(game, player);
-		ai.simulate();
+		ai.testing();
 		eliminating = false;
 		breaking = null;
 		return plan(true);

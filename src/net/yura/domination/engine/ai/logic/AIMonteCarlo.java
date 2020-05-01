@@ -12,37 +12,74 @@ public class AIMonteCarlo {
 	
 	Player player;
 	RiskGame game;
-	AIHeuristic heur;
 	
 	public AIMonteCarlo(RiskGame game, Player player) {
-//		this.player = clonePlayer(player);
 		this.game = cloneGame(game);
 		this.player = this.game.getCurrentPlayer();
-//		if (this.player == player) System.out.println("same player");
-//		else System.out.println("not same player");
-		heur = new AIHeuristic(this.game, this.player);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<Move> getPossibleMoves() {
-		System.out.println("Possible moves for: " + player.getName());
-		ArrayList<Move> possibs = new ArrayList<Move>();
-		for (Country us : (Vector<Country>) player.getTerritoriesOwned()) {
-			for (Country them : (Vector<Country>) us.getNeighbours()) {
-				if (them.getOwner() != player) {
-					for (MoveStrength s : MoveStrength.values()) {
-						possibs.add(new Move(us, them, s));
-					}
-				}
+	public void testing() {
+		Node root = new Node(game);
+		for (Move m : root.getPossibleMoves()) {
+			root.addChildFromMove(m);
+		}
+	}
+	
+	private Move getMove(RiskGame game) {
+		Node root = new Node(game);
+		for (int i=0; i<1000; i++) MCTSLoop(root);
+		return root.bestWinChild().move; 
+
+	}
+	
+	private void MCTSLoop(Node root) {
+		Node selectedNode = select(root);
+		expand(selectedNode); //expand function also handles simulating and backpropogating
+	}
+	
+	private Node select(Node root) {
+		if (!root.isExpanded) return root; //if we have come across a non-fully expanded node, pick that one
+		// TODO def need to add probability stuff here
+		else return select(root.bestValueChild()); //otherwise pick the most promising child
+	}
+	
+	private void expand(Node n) {
+		if (n.terminalState) { //if node is a terminal state, just re-backpropogate the sim results
+			//old code:
+			//backpropogate(n, simulate(n));
+			// TODO new code
+			return;
+		}
+		
+		if (n.children.size() == 0) { //if children have not yet been added, add them
+			List<Move> validMoves = n.getPossibleMoves();
+			for (Move m : validMoves) n.addChildFromMove(m);
+		}
+		//Run a simulation on one of the children
+		for (Node ni : n.children) {
+			if (ni.simsCount < 1) {
+				//old code:
+				//backpropogate(ni, simulate(ni));
+				// TODO new code
+				// possible we might remove the simulating step...cuz we just move to 
+				// the next state with a probability inbetween
+				return; //only run one simulation on one child
 			}
 		}
-		return possibs;
+		
+		//If every child node has had a simulation on it, this node is considered fully expanded
+		n.isExpanded = true;		
 	}
 	
+	private void backpropogate(Node n, int simResults) {
+		// TODO make this update probabilities 
+		n.simsCount += 1;
+		if (n.parent != null) backpropogate(n.parent, simResults);
+	}
 	
 	@SuppressWarnings("unchecked")
 	public void simulate() {
-		List p = getPossibleMoves();
+		
 		
 //		Vector<Player> ps = game.getPlayers();
 //		for (Country ct : (Vector<Country>) player.getTerritoriesOwned()) {
