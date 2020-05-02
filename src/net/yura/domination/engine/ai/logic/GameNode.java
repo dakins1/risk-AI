@@ -11,7 +11,7 @@ import net.yura.domination.engine.core.Country;
 import net.yura.domination.engine.core.Player;
 import net.yura.domination.engine.core.RiskGame;
 
-public class Node implements Comparable<Node> {
+public class GameNode implements Comparable<GameNode> {
 
 	// TODO create the applyMove() function
 	// TODO add probability features
@@ -20,16 +20,17 @@ public class Node implements Comparable<Node> {
 	
 	public int winCount = 0;
 	public int simsCount = 0;
+	public double p; //probability that we get to this state
 	public int heuristic;
-	public Node parent; 
+	public GameNode parent; 
 	public RiskGame game; //the resulting board/game state of move
 	public Player player;
 	public boolean terminalState;
 	public boolean isExpanded;
 	public Move move; //the move made that created this board/game state
-	public ArrayList<Node> children = new ArrayList<Node>();
+	public ArrayList<GameNode> children = new ArrayList<GameNode>();
 	
-	public Node(RiskGame game) { //for when this is root node
+	public GameNode(RiskGame game) { //for when this is root node
 		this.game = game;
 		this.player = this.game.getCurrentPlayer();
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
@@ -38,7 +39,7 @@ public class Node implements Comparable<Node> {
 		isExpanded = false;
 	}
 	
-	public Node(RiskGame game, Move move, Node parent) {
+	public GameNode(RiskGame game, Move move, GameNode parent) {
 		this.game = cloneGame(game);
 		this.player = this.game.getCurrentPlayer();
 		this.move = move;
@@ -105,20 +106,20 @@ public class Node implements Comparable<Node> {
 		}
 	}
 	
-	public Node addChildFromMove(Move newMove) {
-		Node newNode = new Node(game, newMove, this);
+	public GameNode addChildFromMove(Move newMove) {
+		GameNode newNode = new GameNode(game, newMove, this);
 		children.add(newNode);
 		return newNode;
 	}
 	
-	public Node bestValueChild() {
-		Node winner = Collections.max(children);
+	public GameNode bestValueChild() {
+		GameNode winner = Collections.max(children);
 		return winner;
 	}
 	
-	public Node bestWinChild() {
-		class WinComp implements Comparator<Node> {
-			public int compare(Node n1, Node n2) {
+	public GameNode bestWinChild() {
+		class WinComp implements Comparator<GameNode> {
+			public int compare(GameNode n1, GameNode n2) {
 				return Double.compare(n1.winRatio(), n2.winRatio());
 			}
 		}
@@ -126,7 +127,7 @@ public class Node implements Comparable<Node> {
 	}
 	
 	@Override 
-	public int compareTo(Node n2) {
+	public int compareTo(GameNode n2) {
 		//might need to add UCB here
 		return Double.compare(ucb(), n2.ucb());		
 	}
