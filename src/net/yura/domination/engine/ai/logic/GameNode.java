@@ -34,6 +34,7 @@ public class GameNode implements Comparable<GameNode> {
 	public double[] strengths = { .2, .4, .6, .8, 1.0 };
 	
 	public GameNode(RiskGame game) { //for when this is root node
+		System.out.println("Brooo what the fuuuckkk");
 		this.game = game;
 		this.player = this.game.getCurrentPlayer();
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
