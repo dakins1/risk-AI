@@ -6,22 +6,20 @@ public class Move {
 
 	Country attacker;
 	Country defender;
-	MoveStrength strength;
 	int atkArmy;
 	int defArmy;
 	
-	public Move(Country attacker, Country defender, MoveStrength strength) {
+	public Move(Country attacker, Country defender, int atkSize, int defSize) {
 		this.attacker = attacker;
 		this.defender = defender;
-		this.strength = strength;
-		atkArmy = attacker.getArmies();
-		defArmy = defender.getArmies();
+		atkArmy = atkSize;
+		defArmy = defSize;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format(attacker.getName() + " " + attacker.getOwner().getName() + " attacking " + defender.getName() +
-				" " + defender.getOwner().getName() + ", strength " + strength.toString());
+		return String.format(attacker.getName() + " " + atkArmy + " attacking " + defender.getName() +
+				" " + defArmy);
 	}
 	
 	
