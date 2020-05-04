@@ -14,9 +14,11 @@ public class PNode implements Comparable<PNode> {
 	public Player player;
 	
 	public int simsCount;
-	public boolean isExpanded; //??
+	public GameNode parent;
+	public boolean isExpanded; 
 	public List<GameNode> children;
-	public double average; //weighted avg of rewards and probabilities
+	public int totalChildValue = 0;
+	
 	List<Double> childrenOutcomes;
 	public double[] percentages = { 0, .20, .40, .60, .80, 1.0 };
 	List<Integer> atkDice;
@@ -30,24 +32,28 @@ public class PNode implements Comparable<PNode> {
 		this.move = move;
 		atkDice = new ArrayList<Integer>();
 		defDice = new ArrayList<Integer>();		
-
+		
+		this.parent = parent;
 		simsCount = 0;
 		children = new ArrayList<GameNode>();
 		generateChildren();
 		childrenOutcomes = simulateOutcomes(this.move.atkArmy, this.move.defArmy);
-		System.out.println("Original move: " + move.toString());
 		for (int i=0; i<childrenOutcomes.size(); i++) {
 			children.get(i).prob = childrenOutcomes.get(i);
+			// TODO okay hold up...is the chance node value (sum of all children*p) / simCount or ((sum of children*p/simCount) /simCount)
+			//for each child, add their weighted value to this node and tally a simulation
+			totalChildValue += children.get(i).weightedValue();
+			simsCount++;
 		}
 	}
 
 
 	public void generateChildren() {
-		System.out.println("Generating resulting gameNodes for pnode");
 //		System.out.println("Original attack: " + move.atkArmy + " vs. " + move.defArmy + " strength " + move.strength);
 		for (double p : percentages) {
 			if (p == 0) {
 				Move m = new Move(move.attacker, move.defender, 0, move.defender.getArmies());
+				m.originalAtkArmy = move.atkArmy;
 				children.add(new GameNode(game, m, this));
 			} else {	
 				int size = (int) ((int) move.atkArmy*p);
@@ -57,10 +63,24 @@ public class PNode implements Comparable<PNode> {
 		}
 	}
 	
+	public double average() {
+		//weighted average or weighted sum?????????????????????????????????????????????????????????????????????????
+		return Double.valueOf(totalChildValue) / Double.valueOf(simsCount);
+	}
+	
+	public double ucb() {
+		if (simsCount == 0 || parent == null) return Double.MAX_VALUE; 
+		else {
+			int c = 3; //set to 3 based off slides
+			// TODO change this math to probability
+			return average() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
+		} 
+	}
+	
 	@Override 
 	public int compareTo(PNode n2) {
 		//might need to add UCB here
-		return Double.compare(average, n2.average);		
+		return Double.compare(average(), n2.average());		
 	}
 	
 	public List<Double> simulateOutcomes(int atk, int def) {

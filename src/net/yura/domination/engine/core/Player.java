@@ -31,6 +31,7 @@ public class Player implements Serializable {
     private int color;
     private int extraArmies;
     private Vector cardsOwned;
+    private int numberCardsOwned;
     private Vector territoriesOwned;
     private Vector playersEliminated;
     private Country capital;
@@ -70,6 +71,14 @@ public class Player implements Serializable {
 	Statistics = new Vector();
 	currentStatistic = new Statistic();
 	Statistics.add(currentStatistic);
+    }
+    
+    public void simualteCardAdded() {
+    	numberCardsOwned += 1;
+    }
+    
+    public int getNumberCardsOwned() {
+    	return numberCardsOwned;
     }
     
     public Player deepCopy() throws Exception
@@ -189,6 +198,7 @@ public class Player implements Serializable {
      * @param card The card you have gained
      */
     public void giveCard(Card card) {
+    	numberCardsOwned++;
         cardsOwned.add(card);
     }
 
@@ -237,6 +247,7 @@ public class Player implements Serializable {
      * @return Card The card that is taken
      */
     public Card takeCard() {
+    	numberCardsOwned--;
 	Card c=(Card)cardsOwned.firstElement();
 	cardsOwned.removeElementAt(0);
         return c;
@@ -265,7 +276,7 @@ public class Player implements Serializable {
 	    ((Country)card3.getCountry()).addArmies(noaFORcard);
 	    currentStatistic.addReinforcements(noaFORcard);
 	}
-
+		numberCardsOwned-=3;
 	cardsOwned.remove(card1);
 	cardsOwned.remove(card2);
 	cardsOwned.remove(card3);

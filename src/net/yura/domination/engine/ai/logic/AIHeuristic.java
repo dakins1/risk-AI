@@ -24,9 +24,13 @@ public class AIHeuristic {
 	//		this won't be necessary 
 	// TODO card rating balancing?
 	
+	// TODO consider giving extra points to owning border territories - but number of troops in border territories might
+	//		already naturally account for this
+	
 	int ownedBorderScale = 3;
 	int borderScale = 2;
 	int ownedContinentExp = 2;
+	int ownedCountriesScale = 2;
 	int cardScale = 4;
 	RiskGame game;
 	Player player;
@@ -39,10 +43,11 @@ public class AIHeuristic {
 	
 	int getRating() {
 		int total = 0;
-		total += player.getNoTerritoriesOwned();
+		total += player.getNoTerritoriesOwned() * ownedCountriesScale;
 		total += continentOwnershipRating();
 		total += ownedBorderStrengthRating();
 		total += borderStrengthRating();
+		total += genericTroopRating();
 		total += cardRating();
 		return total;
 	}
@@ -101,6 +106,6 @@ public class AIHeuristic {
 	}
 
 	int cardRating() {
-		return player.getCards().size() * cardScale;
+		return player.getNumberCardsOwned() * cardScale;
 	}
 }

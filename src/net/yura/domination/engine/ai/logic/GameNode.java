@@ -19,9 +19,8 @@ public class GameNode implements Comparable<GameNode> {
 	//		so far i've tested creating a node and adding children, and that all works
 	
 	public int simsCount = 0;
-	public double p; //probability that we get to this state
 	public int heuristic;
-	public double prob;
+	public double prob; //probability of reaching this state
 	public double totalChildValue = 0;
 	
 	public PNode parent; 
@@ -34,7 +33,6 @@ public class GameNode implements Comparable<GameNode> {
 	public double[] strengths = { .2, .4, .6, .8, 1.0 };
 	
 	public GameNode(RiskGame game) { //for when this is root node
-		System.out.println("Brooo what the fuuuckkk");
 		this.game = game;
 		this.player = this.game.getCurrentPlayer();
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
@@ -43,12 +41,11 @@ public class GameNode implements Comparable<GameNode> {
 		isExpanded = false;
 	}
 	
-	//Add probability parameter to this?
 	public GameNode(RiskGame game, Move move, PNode parent) {
-		System.out.println("I hate github");
 		this.game = cloneGame(game);
 		this.player = this.game.getCurrentPlayer();
 		this.move = move;
+		copyCountriesToMove(this.game, this.move);
 		applyMove(this.game, this.move);
 		this.parent = parent;
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
@@ -58,11 +55,16 @@ public class GameNode implements Comparable<GameNode> {
 	}
 	
 	private void applyMove(RiskGame g, Move m) {
-		//if its a winning move, moves troop into defending territory and changes ownership
-		// TODO 
-		//this will apply the move m to game g
-		//should mutate this copy of the game
-		
+		if (m.atkArmy == 0) { //simulating a loss
+			m.attacker.removeArmies(m.originalAtkArmy); 
+			//possibly add something for defending army, but only for later heuristics
+		} else { //simulating victory
+			m.defender.removeArmies(m.defender.getArmies());
+			m.defender.setOwner(m.attacker.getOwner()); //transferring ownership to attacker
+			m.defender.addArmies(m.atkArmy);
+			m.attacker.removeArmies(m.atkArmy);
+			// TODO add something that keeps track of cards maybe?
+		}
 	}
 	
 	public void generateChildren() {
@@ -89,6 +91,12 @@ public class GameNode implements Comparable<GameNode> {
 		return possibs;
 	}
 	
+	private void copyCountriesToMove(RiskGame g, Move m) {
+		//The game has a deep copy of the country, so reassign the move's country pointers to the game's copies
+		m.attacker = g.getCountryInt(m.attacker.getColor());
+		m.defender = g.getCountryInt(m.defender.getColor());
+	}
+	
 	private RiskGame cloneGame(RiskGame gameToClone) { 
 		RiskGame copy = null;
 		//perhaps we shouldn't catch this exception, so we really know when a copy hasn't been made. 
@@ -103,6 +111,11 @@ public class GameNode implements Comparable<GameNode> {
 	}
 	
 	public double weightedValue() {
+		if (simsCount == 0) return 0.0;
+		else return ((heuristic * prob)+totalChildValue);
+	}
+	
+	public double weightedValueWithSim() {
 		if (simsCount == 0) return 0.0;
 		else return ((heuristic * prob)+totalChildValue) / Double.valueOf(simsCount);
 	}
@@ -123,20 +136,18 @@ public class GameNode implements Comparable<GameNode> {
 		return newNode;
 	}
 	
-	public PNode bestValueChild() {
+	public PNode bestUCBChild() {
 		PNode winner = Collections.max(children);
 		return winner;
 	}
 	
-	public GameNode bestWinChild() {
-		class WinComp implements Comparator<GameNode> {
-			public int compare(GameNode n1, GameNode n2) {
-				return Double.compare(n1.weightedValue(), n2.weightedValue());
+	public PNode bestWinChild() {
+		class WinComp implements Comparator<PNode> {
+			public int compare(PNode n1, PNode n2) {
+				return Double.compare(n1.average(), n2.average());
 			}
 		}
-		//temporary fix to get errors to frigg off
-		return this;
-				//Collections.max(children, new WinComp());
+		return Collections.max(children, new WinComp());
 	}
 	
 	@Override 

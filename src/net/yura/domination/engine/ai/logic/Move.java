@@ -4,10 +4,11 @@ import net.yura.domination.engine.core.Country;
 
 public class Move {
 
-	Country attacker;
-	Country defender;
-	int atkArmy;
-	int defArmy;
+	public Country attacker;
+	public Country defender;
+	public int atkArmy;
+	public int defArmy;
+	public int originalAtkArmy; //very special case for when we want to track lost armies for a lost battle
 	
 	public Move(Country attacker, Country defender, int atkSize, int defSize) {
 		this.attacker = attacker;
