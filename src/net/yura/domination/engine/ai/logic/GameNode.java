@@ -45,6 +45,7 @@ public class GameNode implements Comparable<GameNode> {
 	
 	//Add probability parameter to this?
 	public GameNode(RiskGame game, Move move, PNode parent) {
+		System.out.println("I hate github");
 		this.game = cloneGame(game);
 		this.player = this.game.getCurrentPlayer();
 		this.move = move;
