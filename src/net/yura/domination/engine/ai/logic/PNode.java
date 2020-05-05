@@ -7,16 +7,11 @@ import java.util.List;
 import net.yura.domination.engine.core.Player;
 import net.yura.domination.engine.core.RiskGame;
 
-public class PNode implements Comparable<PNode> {
+public class PNode extends Node {
 
-	public Move move;
 	public RiskGame game;
 	public Player player;
 	
-	public int simsCount;
-	public GameNode parent;
-	public boolean isExpanded; 
-	public List<GameNode> children;
 	public int totalChildValue = 0;
 	
 	List<Double> childrenOutcomes;
@@ -26,30 +21,27 @@ public class PNode implements Comparable<PNode> {
 	
 	public PNode(RiskGame game, Move move, GameNode parent) {
 		//Might need to be a deep copy??? Might not since we're not mutating anything
-		
 		this.game = game;
 		this.player = game.getCurrentPlayer();
 		this.move = move;
 		atkDice = new ArrayList<Integer>();
-		defDice = new ArrayList<Integer>();		
+		defDice = new ArrayList<Integer>();
 		
+//		if (game.checkPlayerWon() || pagetPossibleMoves().size() == 0) terminalState = true;
+		terminalState = false;
+		
+		isVisited = false;
+		isExpanded = false; 
+		totalChildValue = 0;
 		this.parent = parent;
 		simsCount = 0;
-		children = new ArrayList<GameNode>();
-		generateChildren();
-		childrenOutcomes = simulateOutcomes(this.move.atkArmy, this.move.defArmy);
-		for (int i=0; i<childrenOutcomes.size(); i++) {
-			children.get(i).prob = childrenOutcomes.get(i);
-			// TODO okay hold up...is the chance node value (sum of all children*p) / simCount or ((sum of children*p/simCount) /simCount)
-			//for each child, add their weighted value to this node and tally a simulation
-			totalChildValue += children.get(i).weightedValue();
-			simsCount++;
-		}
+		children = new ArrayList<Node>();
 	}
 
 
 	public void generateChildren() {
 //		System.out.println("Original attack: " + move.atkArmy + " vs. " + move.defArmy + " strength " + move.strength);
+//		System.out.println(this.hashCode() + " has children added");
 		for (double p : percentages) {
 			if (p == 0) {
 				Move m = new Move(move.attacker, move.defender, 0, move.defender.getArmies());
@@ -61,11 +53,28 @@ public class PNode implements Comparable<PNode> {
 				if (m.atkArmy > 0) children.add(new GameNode(game, m, this));				
 			}
 		}
+		childrenOutcomes = simulateOutcomes(this.move.atkArmy, this.move.defArmy);
+		for (int i=0; i<childrenOutcomes.size(); i++) {
+			children.get(i).prob = childrenOutcomes.get(i);
+			// TODO okay hold up...is the chance node value (sum of all children*p) / simCount or ((sum of children*p/simCount) /simCount)
+			//for each child, add their weighted value to this node and tally a simulation
+			totalChildValue += ((GameNode) children.get(i)).weightedValue();
+			simsCount++;
+		}
 	}
 	
-	public double average() {
+	public double weightedValueWithSim() {
 		//weighted average or weighted sum?????????????????????????????????????????????????????????????????????????
 		return Double.valueOf(totalChildValue) / Double.valueOf(simsCount);
+	}
+	
+	public double weightedValue() {
+		return totalChildValue;
+	}
+	
+	public GameNode bestUCBChild() {
+		GameNode winner = (GameNode) Collections.max(children);
+		return winner;
 	}
 	
 	public double ucb() {
@@ -73,14 +82,8 @@ public class PNode implements Comparable<PNode> {
 		else {
 			int c = 3; //set to 3 based off slides
 			// TODO change this math to probability
-			return average() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
+			return weightedValueWithSim() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
 		} 
-	}
-	
-	@Override 
-	public int compareTo(PNode n2) {
-		//might need to add UCB here
-		return Double.compare(average(), n2.average());		
 	}
 	
 	public List<Double> simulateOutcomes(int atk, int def) {

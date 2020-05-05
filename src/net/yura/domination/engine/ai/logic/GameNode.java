@@ -11,34 +11,33 @@ import net.yura.domination.engine.core.Country;
 import net.yura.domination.engine.core.Player;
 import net.yura.domination.engine.core.RiskGame;
 
-public class GameNode implements Comparable<GameNode> {
+public class GameNode extends Node {
 
 	// TODO create the applyMove() function
 	// TODO add probability features
 	// TODO test
 	//		so far i've tested creating a node and adding children, and that all works
 	
-	public int simsCount = 0;
 	public int heuristic;
-	public double prob; //probability of reaching this state
-	public double totalChildValue = 0;
 	
-	public PNode parent; 
 	public RiskGame game; //the resulting board/game state of move
 	public Player player;
 	public boolean terminalState;
-	public boolean isExpanded;
-	public Move move; //the move made that created this board/game state
-	public ArrayList<PNode> children = new ArrayList<PNode>();
-	public double[] strengths = { .2, .4, .6, .8, 1.0 };
+	//the move made that created this board/game state
+//	public double[] strengths = { .2, .4, .6, .8, 1.0 };
+	public double[] strengths = { 1.0 };
 	
 	public GameNode(RiskGame game) { //for when this is root node
+		simsCount = 0;
 		this.game = game;
 		this.player = this.game.getCurrentPlayer();
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
 		if (game.checkPlayerWon() || getPossibleMoves().size() == 0) terminalState = true;
 		else terminalState = false;
 		isExpanded = false;
+		children = new ArrayList<Node>();
+		totalChildValue = 0;
+		isVisited = false;
 	}
 	
 	public GameNode(RiskGame game, Move move, PNode parent) {
@@ -48,10 +47,14 @@ public class GameNode implements Comparable<GameNode> {
 		copyCountriesToMove(this.game, this.move);
 		applyMove(this.game, this.move);
 		this.parent = parent;
+		simsCount = 1;
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
 		if (game.checkPlayerWon() || getPossibleMoves().size() == 0) terminalState = true;
 		else terminalState = false;
 		isExpanded = false;
+		children = new ArrayList<Node>();
+		totalChildValue = 0;
+		isVisited = false;
 	}
 	
 	private void applyMove(RiskGame g, Move m) {
@@ -126,7 +129,7 @@ public class GameNode implements Comparable<GameNode> {
 		else {
 			int c = 3; //set to 3 based off slides
 			// TODO change this math to probability
-			return weightedValue() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
+			return weightedValueWithSim() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
 		} 
 	}
 	
@@ -137,22 +140,18 @@ public class GameNode implements Comparable<GameNode> {
 	}
 	
 	public PNode bestUCBChild() {
-		PNode winner = Collections.max(children);
+		PNode winner = (PNode) Collections.max(children);
 		return winner;
 	}
 	
 	public PNode bestWinChild() {
-		class WinComp implements Comparator<PNode> {
-			public int compare(PNode n1, PNode n2) {
-				return Double.compare(n1.average(), n2.average());
+		class WinComp implements Comparator<Node> {
+			public int compare(Node n1, Node n2) {
+				return Double.compare(n1.weightedValueWithSim(), n2.weightedValueWithSim());
 			}
 		}
-		return Collections.max(children, new WinComp());
+		return (PNode) Collections.max(children, new WinComp());
 	}
 	
-	@Override 
-	public int compareTo(GameNode n2) {
-		//might need to add UCB here
-		return Double.compare(ucb(), n2.ucb());		
-	}
+	
 }

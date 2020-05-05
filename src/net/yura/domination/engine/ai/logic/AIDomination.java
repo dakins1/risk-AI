@@ -2072,7 +2072,8 @@ public class AIDomination extends AISubmissive {
 
 	public String getAttack() {
 		AIMonteCarlo ai = new AIMonteCarlo(game, player);
-		ai.testing();
+		Move move = ai.getMove();
+		System.out.println(move.toString());
 		eliminating = false;
 		breaking = null;
 		return plan(true);
