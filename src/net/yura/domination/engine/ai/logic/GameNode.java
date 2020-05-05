@@ -48,7 +48,7 @@ public class GameNode extends Node {
 		this.parent = parent;
 		simsCount = 1;
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
-		if (move.atkArmy == -1) System.out.println("End node created, heuristic" + heuristic);
+		if (move.atkArmy == -1) System.out.println("End node created, heuristic" + this.heuristic);
 		if (game.checkPlayerWon() || getPossibleMoves().size() == 0 || move.atkArmy == -1) terminalState = true;
 		else terminalState = false;
 		isExpanded = false;
@@ -74,6 +74,8 @@ public class GameNode extends Node {
 	}
 	
 	public void generateChildren() {
+
+		if (this.move != null && this.move.atkArmy == -1) System.out.println("\n\n\n\nTHIS SHOULDNT HAPPEN!\n\n\n\n");
 		for (Move m : getPossibleMoves()) {
 			children.add(new PNode(game, m, this));
 		}
@@ -130,7 +132,7 @@ public class GameNode extends Node {
 	}
 	
 	public double ucb() {
-		if (game.checkPlayerWon() || getPossibleMoves().size() == 0) return -1;
+		//if (game.checkPlayerWon() || getPossibleMoves().size() == 0) return -1;
 		if (simsCount == 0 || parent == null) return Double.MAX_VALUE; 
 		else {
 			int c = 3; //set to 3 based off slides

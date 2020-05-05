@@ -33,9 +33,9 @@ public class AIMonteCarlo {
 		}
 		for (int i=0; i<150; i++) {
 			MCTSLoop(root);
+
 			for (Node ni : root.children) {
-				if (ni.move.atkArmy == -1) System.out.print("End turn node ");
-				System.out.println(ni.weightedValueWithSim());
+				if (ni.move.atkArmy == -1) System.out.println("End turn node " + ni.weightedValueWithSim());
 			}
 		}
 		for (Node ni : root.children) {

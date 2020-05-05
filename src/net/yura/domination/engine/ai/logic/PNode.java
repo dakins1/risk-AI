@@ -86,6 +86,8 @@ public class PNode extends Node {
 	
 	public List<Double> simulateOutcomes(int atk, int def) {
 		
+		if (this.move.atkArmy == -1) System.out.println("\n\n\n\nTHIS SHOULDNT HAPPEN FOR A PNODE!\n\n\n\n");
+		
 		int[] outcomesArr = {0,0,0,0,0, 0};
 		
 		int numOfSimulations = 100000;
