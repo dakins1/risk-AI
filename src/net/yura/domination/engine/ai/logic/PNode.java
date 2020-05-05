@@ -12,8 +12,6 @@ public class PNode extends Node {
 	public RiskGame game;
 	public Player player;
 	
-	public int totalChildValue = 0;
-	
 	List<Double> childrenOutcomes;
 	public double[] percentages = { 0, .20, .40, .60, .80, 1.0 };
 	List<Integer> atkDice;
@@ -30,25 +28,20 @@ public class PNode extends Node {
 //		if (game.checkPlayerWon() || pagetPossibleMoves().size() == 0) terminalState = true;
 		this.parent = parent;
 		children = new ArrayList<Node>();
-		
-		if (move.atkArmy == -1) {
-			this.isExpanded = true;
-			this.terminalState  = true;
-			this.totalChildValue = parent.heuristic;
-			this.simsCount = 1;
-		} else {
-			this.isExpanded = false; 
-			this.terminalState = false;
-			this.totalChildValue = 0;
-			this.simsCount = 0;
-		}
+		this.isExpanded = false; 
+		this.terminalState = false;
+		this.totalChildValue = 0;
+		this.simsCount = 0;
 	}
 
 
 	public void generateChildren() {
-//		System.out.println("Original attack: " + move.atkArmy + " vs. " + move.defArmy + " strength " + move.strength);
-//		System.out.println(this.hashCode() + " has children added");
+		if (move.atkArmy == -1) {
+			children.add(new GameNode(game, move, this));
+			childrenOutcomes = new ArrayList<Double>();
+			childrenOutcomes.add(1.0);
 		
+		} else {
 			for (double p : percentages) {
 				if (p == 0) {
 					Move m = new Move(move.attacker, move.defender, 0, move.defender.getArmies());
@@ -61,18 +54,15 @@ public class PNode extends Node {
 				}
 			}
 			childrenOutcomes = simulateOutcomes(this.move.atkArmy, this.move.defArmy);
-			for (int i=0; i<childrenOutcomes.size(); i++) {
-				children.get(i).prob = childrenOutcomes.get(i);
-				// TODO okay hold up...is the chance node value (sum of all children*p) / simCount or ((sum of children*p/simCount) /simCount)
-				//for each child, add their weighted value to this node and tally a simulation
-				totalChildValue += ((GameNode) children.get(i)).weightedValue();
-				simsCount++;
-			}
-		
+		}
+		for (int i=0; i<childrenOutcomes.size(); i++) {
+			children.get(i).prob = childrenOutcomes.get(i);
+			totalChildValue += ((GameNode) children.get(i)).weightedValue();
+			simsCount++;
+		}
 	}
 	
 	public double weightedValueWithSim() {
-		System.out.println(this.hashCode() + " HERE IS SOME MATH: " + Double.valueOf(totalChildValue) + " / " + Double.valueOf(simsCount) + " num childre: " + children.size());
 		return Double.valueOf(totalChildValue) / Double.valueOf(simsCount);
 	}
 	
@@ -86,9 +76,6 @@ public class PNode extends Node {
 	}
 	
 	public double ucb() {
-		if (this.move.atkArmy == -1) {
-			return -1.0;
-		}
 		if (simsCount == 0 || parent == null) return Double.MAX_VALUE; 
 		else {
 			int c = 3; //set to 3 based off slides

@@ -21,7 +21,6 @@ public class GameNode extends Node {
 	
 	public RiskGame game; //the resulting board/game state of move
 	public Player player;
-	public boolean terminalState;
 	//the move made that created this board/game state
 //	public double[] strengths = { .2, .4, .6, .8, 1.0 };
 	public double[] strengths = { 1.0 };
@@ -49,7 +48,8 @@ public class GameNode extends Node {
 		this.parent = parent;
 		simsCount = 1;
 		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
-		if (game.checkPlayerWon() || getPossibleMoves().size() == 0) terminalState = true;
+		if (move.atkArmy == -1) System.out.println("End node created, heuristic" + heuristic);
+		if (game.checkPlayerWon() || getPossibleMoves().size() == 0 || move.atkArmy == -1) terminalState = true;
 		else terminalState = false;
 		isExpanded = false;
 		children = new ArrayList<Node>();
@@ -58,7 +58,10 @@ public class GameNode extends Node {
 	}
 	
 	private void applyMove(RiskGame g, Move m) {
-		if (m.atkArmy == 0) { //simulating a loss
+		if (m.atkArmy == -1) {
+			terminalState = true;
+			return;
+		} else if (m.atkArmy == 0) { //simulating a loss
 			m.attacker.removeArmies(m.originalAtkArmy); 
 			//possibly add something for defending army, but only for later heuristics
 		} else { //simulating victory
@@ -97,8 +100,10 @@ public class GameNode extends Node {
 	
 	private void copyCountriesToMove(RiskGame g, Move m) {
 		//The game has a deep copy of the country, so reassign the move's country pointers to the game's copies
-		m.attacker = g.getCountryInt(m.attacker.getColor());
-		m.defender = g.getCountryInt(m.defender.getColor());
+		if (m.atkArmy != -1) {
+			m.attacker = g.getCountryInt(m.attacker.getColor());
+			m.defender = g.getCountryInt(m.defender.getColor());
+		}
 	}
 	
 	private RiskGame cloneGame(RiskGame gameToClone) { 
