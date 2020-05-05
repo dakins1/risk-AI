@@ -72,7 +72,7 @@ public class PNode extends Node {
 	}
 	
 	public double weightedValueWithSim() {
-		System.out.println("HERE IS SOME MATH: " + Double.valueOf(totalChildValue) + " / " + Double.valueOf(simsCount));
+		System.out.println(this.hashCode() + " HERE IS SOME MATH: " + Double.valueOf(totalChildValue) + " / " + Double.valueOf(simsCount) + " num childre: " + children.size());
 		return Double.valueOf(totalChildValue) / Double.valueOf(simsCount);
 	}
 	

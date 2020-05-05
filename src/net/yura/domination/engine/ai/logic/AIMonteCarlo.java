@@ -33,9 +33,11 @@ public class AIMonteCarlo {
 		}
 		for (int i=0; i<150; i++) {
 			MCTSLoop(root);
-//			for (int j=0; j<root.children.size();j++) {
-//				System.out.println("THIS IS A CHILD VALUE: " + root.children.get(j).weightedValueWithSim());
-//			}
+			for (int j=0; j<root.children.size();j++) {
+				Node x = root.children.get(j);
+				System.out.println("Root child pnode: " + root.children.get(j).hashCode() + " weightedValue: "  + root.children.get(j).weightedValueWithSim() + " total value: " + root.children.get(j).totalChildValue + " simCount " + root.children.get(j).simsCount);
+//				System.out.println()
+			}
 		}
 		for (Node ni : root.children) {
 			
@@ -61,6 +63,7 @@ public class AIMonteCarlo {
 	}
 	
 	private void MCTSLoop(GameNode root) {
+		System.out.println("Game root: " + root.hashCode());
 		Node selectedNode = select(root);
 		expand(selectedNode);
 		simulate(selectedNode); //expand function also handles simulating and backpropogating
@@ -94,7 +97,7 @@ public class AIMonteCarlo {
 	private void expand(Node n) {
 		
 		if (n.terminalState) {
-			backpropogate(n, n.weightedValue(), n.simsCount);
+//			backpropogate(n, n.weightedValue(), n.simsCount);
 			return;
 		}
 		
@@ -107,12 +110,17 @@ public class AIMonteCarlo {
 	
 	private void backpropogate(Node n, double weightedValueTotal, int noOfNewSims) {
 		// TODO make this update probabilities 
+		System.out.println(n.hashCode());
+		if (n.parent == null) System.out.println("Parent is null");
 		System.out.println("SIMS COUNT BEFORE: " + n.simsCount);
 		n.simsCount += noOfNewSims;
 		System.out.println("SIMS COUNT AFTER: " + n.simsCount);
 		System.out.println("TOTAL CHILD VALUE BEFORE: " + n.totalChildValue);
+		System.out.println("Weighted value being added: " + weightedValueTotal);
 		n.totalChildValue += weightedValueTotal;
 		System.out.println("TOTAL CHILD VALUE : " + n.totalChildValue);
+		
+		if (n.parent == n) System.out.println("Parent is equal what on earth");
 		if (n.parent != null) backpropogate(n.parent, weightedValueTotal, noOfNewSims);
 	}
 
