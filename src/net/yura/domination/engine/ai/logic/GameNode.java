@@ -18,7 +18,6 @@ public class GameNode extends Node {
 	// TODO test
 	//		so far i've tested creating a node and adding children, and that all works
 	
-	public int heuristic;
 	
 	public RiskGame game; //the resulting board/game state of move
 	public Player player;
@@ -37,7 +36,8 @@ public class GameNode extends Node {
 		isExpanded = false;
 		children = new ArrayList<Node>();
 		totalChildValue = 0;
-		isVisited = false;
+		this.heuristic = new AIHeuristic(this.game, this.player).getRating();
+		//isVisited = false;
 	}
 	
 	public GameNode(RiskGame game, Move move, PNode parent) {
@@ -54,7 +54,7 @@ public class GameNode extends Node {
 		isExpanded = false;
 		children = new ArrayList<Node>();
 		totalChildValue = 0;
-		isVisited = false;
+		//isVisited = false;
 	}
 	
 	private void applyMove(RiskGame g, Move m) {
@@ -91,6 +91,7 @@ public class GameNode extends Node {
 				}
 			}
 		}
+		possibs.add(new Move(null,null,-1,-1));
 		return possibs;
 	}
 	

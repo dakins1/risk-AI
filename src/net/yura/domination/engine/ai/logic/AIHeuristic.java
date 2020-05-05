@@ -27,11 +27,11 @@ public class AIHeuristic {
 	// TODO consider giving extra points to owning border territories - but number of troops in border territories might
 	//		already naturally account for this
 	
-	int ownedBorderScale = 3;
-	int borderScale = 2;
-	int ownedContinentExp = 2;
-	int ownedCountriesScale = 2;
-	int cardScale = 4;
+	int ownedBorderScale = 2;
+	int borderScale = 1;
+	int ownedContinentExp = 4;
+	int ownedCountriesScale = 4;
+	int cardScale = 2;
 	RiskGame game;
 	Player player;
 	

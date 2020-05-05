@@ -18,6 +18,7 @@ public abstract class Node implements Comparable<Node> {
 	public double totalChildValue;
 	public boolean isVisited;
 	public Move move;
+	public int heuristic;
 	
 	@Override 
 	public int compareTo(Node n2) {

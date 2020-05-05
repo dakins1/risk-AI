@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<shortcuts>
+	<programGroup defaultName="Games" location="applications"/>
+	<shortcut
+		name="Domination"
+		programGroup="yes"
+		target="$INSTALL_PATH/run.sh"
+		iconFile="$INSTALL_PATH/resources/icon.png"
+		workingDirectory="$INSTALL_PATH"
+		type="Application"
+		encoding="UTF-8"
+		description="Starts the Domination game">
+
+<!--		<createForPack name="Domination base files" />-->
+	</shortcut>
+
+	<shortcut
+		name="Domination Map Editor"
+		programGroup="yes"
+		target="$INSTALL_PATH/SwingGUI.sh"
+		iconFile="$INSTALL_PATH/resources/icon.png"
+		workingDirectory="$INSTALL_PATH"
+		type="Application"
+		encoding="UTF-8"
+		description="Starts the Domination Map Editor">
+	</shortcut>
+
+</shortcuts>

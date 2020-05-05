@@ -26,180 +26,96 @@ public class AIMonteCarlo {
 		root.generateChildren();
 	}
 	
-	public Move getMove() {
+	public String getMove() {
 		GameNode root = new GameNode(game);
-		for (int i=0; i<100; i++) MCTSLoop(root);
-		return root.bestWinChild().move; 
+		if (root.terminalState) {
+			return "endattack";
+		}
+		for (int i=0; i<150; i++) {
+			MCTSLoop(root);
+//			for (int j=0; j<root.children.size();j++) {
+//				System.out.println("THIS IS A CHILD VALUE: " + root.children.get(j).weightedValueWithSim());
+//			}
+		}
+		for (Node ni : root.children) {
+			
+			//System.out.println("Node Move: " + ni.move);
+			//System.out.println("Node Value: " + ni.weightedValueWithSim());
+		}
+		//System.out.println("Best Node Move: " + root.bestWinChild().move);
+		//System.out.println("Best Node Value: " + root.bestWinChild().weightedValueWithSim());
+		
+//		if (root.weightedValueWithSim() >= root.totalChildValue/root.children.size()) {
+//			
+//			System.out.println("THE SIMS SUCK DONT DO ANYTHING!!!");
+//
+//			return "endattack";
+//		}
+		
+		if (root.bestWinChild().move.atkArmy == -1) {
+			return "endattack";
+		}
+		
+		return "attack " + root.bestWinChild().move.attacker.getColor() + " " + root.bestWinChild().move.defender.getColor(); 
 
 	}
 	
 	private void MCTSLoop(GameNode root) {
 		Node selectedNode = select(root);
+		expand(selectedNode);
 		simulate(selectedNode); //expand function also handles simulating and backpropogating
 	}
 	
 	private Node select(Node root) {
-		// TODO i think probabilit nodes are already expanded by default
-		if (!root.isExpanded) {
-			if (!root.isVisited) {
-				System.out.println("Generating children for " + root.hashCode() + " inside select !expanded && !visited");
-				root.generateChildren();
-			}
-			if (root.terminalState)
-				return root;
-			
-			root.isVisited = true;
-			for (Node n : root.children) {
-
-				if (!n.isVisited) {
-					if (!n.terminalState) {
-//						System.out.println("Generating children for " + n.hashCode() + " inside select !visited && !terminal");
-//						n.generateChildren();
-					}
-					return n;
-				}
-			}
-			//Null point
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			if (root instanceof GameNode) {
-				System.out.println("Gamenode, num. children: " + root.children.size() + ", value: " + root.totalChildValue);
-			} else {
-				System.out.println(root.move.toString());
-				System.out.println("PNode, num. children: " + root.children.size() + ", value: " + root.totalChildValue);
-				System.out.println("Num grandchildren: " + root.children.get(0).children.size());
-			}
-			
-			for (Node c : root.children) {
-				if (c.parent != null) System.out.println("Parent hash: " + c.parent.hashCode());
-				System.out.println(c.hashCode() + " " + root.move.toString());
-				System.out.println("num. children: " + root.children.size() + ", value: " + root.totalChildValue);
-//				System.out.println("Num grandchildren: " + root.children.get(0).children.size());
-			}
-			
-			
-			System.out.println("\n\n\n NULL ERROR IN LINE 52 \n\n\n");
-			return null;
-
-//			if (root instanceof GameNode) {
-//				System.out.println("Gamenode, num. children: " + root.children.size() + ", value: " + root.totalChildValue);
-//			} else {
-//				System.out.println(root.move.toString());
-//				System.out.println("PNode, num. children: " + root.children.size() + ", value: " + root.totalChildValue);
-//				System.out.println("Num grandchildren: " + root.children.get(0).children.size());
-//			}
-//			
-//			return root; //if we have come across a non-fully expanded node, pick that one
-		}
+		if (!root.isExpanded) return root; 
 		else return select(root.bestUCBChild()); //otherwise pick the most promising child
+		
 	}
 	
 	private void simulate(Node n) {
-//		if (n.terminalState) { //if node is a terminal state, just re-backpropogate the sim results
-//			//old code:
-////			backpropogate(n, simulate(n));
-//			// TODO new code
-//			return;
-//		}
-//		if (n instanceof GameNode) {
-//			System.out.println("Gamenode, num. children: " + n.children.size() + ", value: " + n.totalChildValue);
-//		} else {
-//			System.out.println(n.move.toString());
-//			System.out.println("PNode, num. children: " + n.children.size() + ", value: " + n.totalChildValue);
-//			System.out.println("Num grandchildren: " + n.children.get(0).children.size());
-//		}
 		
-		n.isVisited = true;
-		
-		//only gamenodes get expanded
-		//only pnodes get simulated
-
-		System.out.println("Generating children for " + n.hashCode() + " inside simulate");
-		n.generateChildren();
-		if (n instanceof PNode) {
-			if (n.children.size() == 0) { //hasn't been simulated
-				//essentially simulate the pnode
-//				n.generateChildren();
-				backpropogate(n.parent, n.weightedValue(), n.simsCount);
+		for (Node ni : n.children) {
+			
+			if (ni.simsCount < 1) {
+				//System.out.println("SIMULATING: " + ni.getClass());
+				ni.generateChildren();
+				backpropogate(ni,ni.weightedValue(),ni.simsCount);
+				return;
 			}
-		}
-		if (n.parent != null && !n.parent.isExpanded) {
-			checkExpanded(n.parent);			
+			
 		}
 		
-//		if (n instanceof GameNode) {
-//			if (n.children.size()==0) { //gameNode hasn't been expanded
-//				n.generateChildren(); //expand the node
-//				//nothing to backpropogate
-//			}
-	}
-		
-//		if (n.children.size() == 0) { //if children have not yet been added, add them
-//			n.generateChildren();
-//			if (n instanceof PNode) { //if we just created a bunch of PNodes, there's nothing to backpropogate yet
-//				backpropogate(n.parent, n.weightedValue(), n.simsCount);
-//			}
-//		}
-//		//Run a simulation on one of the children
-//		for (Node ni : n.children) {
-//			//we simulate a pnode by adding all possible gamenode children 
-//			if (ni.simsCount < 1) {
-//				//old code:
-//				//backpropogate(ni, simulate(ni));
-//				// TODO new code
-//				// possible we might remove the simulating step...cuz we just move to 
-//				// the next state with a probability inbetween
-//				return; //only run one simulation on one child
-//			}
-//		}
-//		
-//		//If every child node has had a simulation on it, this node is considered fully expanded
-//		n.isExpanded = true;		
-//	}
-	
-	private void checkExpanded(Node n) {
-		if (n.children.size() == 0) return;
-		else {
-			for (Node ni : n.children) {
-				if (!ni.isVisited) return;
-			}
+		if (n.children.size() != 0) {
 			n.isExpanded = true;
 		}
+		
+	}
+
+	private void expand(Node n) {
+		
+		if (n.terminalState) {
+			backpropogate(n, n.weightedValue(), n.simsCount);
+			return;
+		}
+		
+		if (n.children.size() == 0) {
+			//System.out.println("EXPANDING: " + n.getClass());
+			n.generateChildren();
+		}
+	
 	}
 	
 	private void backpropogate(Node n, double weightedValueTotal, int noOfNewSims) {
 		// TODO make this update probabilities 
+		System.out.println("SIMS COUNT BEFORE: " + n.simsCount);
 		n.simsCount += noOfNewSims;
+		System.out.println("SIMS COUNT AFTER: " + n.simsCount);
+		System.out.println("TOTAL CHILD VALUE BEFORE: " + n.totalChildValue);
 		n.totalChildValue += weightedValueTotal;
+		System.out.println("TOTAL CHILD VALUE : " + n.totalChildValue);
 		if (n.parent != null) backpropogate(n.parent, weightedValueTotal, noOfNewSims);
 	}
-	
-//	@SuppressWarnings("unchecked")
-//	public void simulate() {
-//		
-//		
-//		Vector<Player> ps = game.getPlayers();
-//		for (Country ct : (Vector<Country>) player.getTerritoriesOwned()) {
-//			ct.addArmies(30);
-//		}
-//		for (Country ct : game.getCountries()) {
-//			
-//			if (ct.getOwner() == player) System.out.println("ownership is the same");
-//			ct.addArmies(30);
-//			
-//			
-//			System.out.println(ct.getName() + " color: " + ct.getOwner().getName());
-//			System.out.println("Player color: " + player.getName());
-//			
-//			if (ct.getOwner() == player) System.out.println("Player does == game.country owner, should have 30+ armies: " + ct.getArmies());
-//			else System.out.println("clonedGame.Country is not owned by clonedPlayer.copy");
-//		}
-//	}
+
 	
 	RiskGame cloneGame(RiskGame gameToClone) { 
 		RiskGame copy = null;

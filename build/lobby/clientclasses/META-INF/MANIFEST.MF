@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.5
+Created-By: 1.8.0_222-8u222-b10-1ubuntu1~18.04.1-b10 (Private Build)
+Class-Path: BrowserLauncher2.jar
+

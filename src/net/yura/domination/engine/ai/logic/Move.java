@@ -19,6 +19,11 @@ public class Move {
 	
 	@Override
 	public String toString() {
+		
+		if (atkArmy == -1) {
+			return "endattack";
+		}
+		
 		return String.format(attacker.getName() + " " + atkArmy + " attacking " + defender.getName() +
 				" " + defArmy);
 	}
