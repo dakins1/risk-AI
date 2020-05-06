@@ -21,23 +21,27 @@ public class PNode extends Node {
 		//Might need to be a deep copy??? Might not since we're not mutating anything
 		this.game = game;
 		this.player = game.getCurrentPlayer();
-		this.move = move;
+		
 		atkDice = new ArrayList<Integer>();
 		defDice = new ArrayList<Integer>();
 		
 //		if (game.checkPlayerWon() || pagetPossibleMoves().size() == 0) terminalState = true;
-		this.parent = parent;
-		children = new ArrayList<Node>();
-		this.isExpanded = false; 
-		this.terminalState = false;
-		this.totalChildValue = 0;
-		this.simsCount = 0;
+		
+		this.setMove(move);
+		this.setParent(parent);
+		this.setChildren(new ArrayList<Node>());
+		this.setIsExpanded(false);
+		this.setTerminalState(false);
+		this.setTotalChildValue(0.0);
+		this.setSimsCount(0);
 	}
 
 
 	public void generateChildren() {
-		if (move.atkArmy == -1) {
-			children.add(new GameNode(game, move, this));
+		Move move = this.getMove();
+		List<Node> children = this.getChildren();
+		if (this.getMove().atkArmy == -1) {
+			this.getChildren().add(new GameNode(game, move, this));
 			childrenOutcomes = new ArrayList<Double>();
 			childrenOutcomes.add(1.0);
 		
@@ -53,40 +57,55 @@ public class PNode extends Node {
 					if (m.atkArmy > 0) children.add(new GameNode(game, m, this));				
 				}
 			}
-			childrenOutcomes = simulateOutcomes(this.move.atkArmy, this.move.defArmy);
+			childrenOutcomes = simulateOutcomes(move.atkArmy, move.defArmy);
 		}
 		for (int i=0; i<childrenOutcomes.size(); i++) {
-			children.get(i).prob = childrenOutcomes.get(i);
-			totalChildValue += ((GameNode) children.get(i)).weightedValue();
-			simsCount++;
+			children.get(i).setProb(childrenOutcomes.get(i));
+			double totalChildValue = this.getTotalChildValue();
+			double newTotalChildValue = totalChildValue + ((GameNode) children.get(i)).weightedValue();
+			this.setTotalChildValue(newTotalChildValue);
+			
+			int newSimsCount = this.getSimsCount() + 1;
+			this.setSimsCount(newSimsCount);
+		
 		}
 	}
 	
 	public double weightedValueWithSim() {
+		double totalChildValue = this.getTotalChildValue();
+		double simsCount = this.getSimsCount();
 		return Double.valueOf(totalChildValue) / Double.valueOf(simsCount);
 	}
 	
 	public double weightedValue() {
+		double totalChildValue = this.getTotalChildValue();
 		return totalChildValue;
 	}
 	
 	public GameNode bestUCBChild() {
+		List<Node> children = this.getChildren();
 		GameNode winner = (GameNode) Collections.max(children);
 		return winner;
 	}
 	
 	public double ucb() {
+		
+		int simsCount = this.getSimsCount();
+		Node parent = this.getParent();
+		
 		if (simsCount == 0 || parent == null) return Double.MAX_VALUE; 
 		else {
 			int c = 3; //set to 3 based off slides
 			// TODO change this math to probability
-			return weightedValueWithSim() + (c * Math.sqrt(2 * Math.log(parent.simsCount) / simsCount));
+			return weightedValueWithSim() + (c * Math.sqrt(2 * Math.log(parent.getSimsCount()) / simsCount));
 		} 
 	}
 	
 	public List<Double> simulateOutcomes(int atk, int def) {
 		
-		if (this.move.atkArmy == -1) System.out.println("\n\n\n\nTHIS SHOULDNT HAPPEN FOR A PNODE!\n\n\n\n");
+		Move move = this.getMove();
+		
+		if (move.atkArmy == -1) System.out.println("\n\n\n\nTHIS SHOULDNT HAPPEN FOR A PNODE!\n\n\n\n");
 		
 		int[] outcomesArr = {0,0,0,0,0, 0};
 		

@@ -28,36 +28,25 @@ public class AIMonteCarlo {
 	
 	public String getMove() {
 		GameNode root = new GameNode(game);
-		if (root.terminalState) {
+		if (root.getTerminalState()) {
 			return "endattack";
 		}
 		for (int i=0; i<150; i++) {
 			MCTSLoop(root);
 
-			for (Node ni : root.children) {
-				if (ni.move.atkArmy == -1) System.out.println("End turn node " + ni.weightedValueWithSim());
+			for (Node ni : root.getChildren()) {
+				Move move = ni.getMove();
+				if (move.atkArmy == -1) System.out.println("End turn node " + ni.weightedValueWithSim());
 			}
 		}
-		for (Node ni : root.children) {
-			
-			//System.out.println("Node Move: " + ni.move);
-			//System.out.println("Node Value: " + ni.weightedValueWithSim());
-		}
-		//System.out.println("Best Node Move: " + root.bestWinChild().move);
-		//System.out.println("Best Node Value: " + root.bestWinChild().weightedValueWithSim());
 		
-//		if (root.weightedValueWithSim() >= root.totalChildValue/root.children.size()) {
-//			
-//			System.out.println("THE SIMS SUCK DONT DO ANYTHING!!!");
-//
-//			return "endattack";
-//		}
+		Move bestWinChildMove = root.bestWinChild().getMove();
 		
-		if (root.bestWinChild().move.atkArmy == -1) {
+		if (bestWinChildMove.atkArmy == -1) {
 			return "endattack";
 		}
 		
-		return "attack " + root.bestWinChild().move.attacker.getColor() + " " + root.bestWinChild().move.defender.getColor(); 
+		return "attack " + bestWinChildMove.attacker.getColor() + " " + bestWinChildMove.defender.getColor(); 
 
 	}
 	
@@ -68,43 +57,48 @@ public class AIMonteCarlo {
 	}
 	
 	private Node select(Node root) {
-		if (!root.isExpanded) return root; 
+		if (!root.getIsExpanded()) return root; 
 		else return select(root.bestUCBChild()); //otherwise pick the most promising child
 		
 	}
 	
 	private void expand(Node n) {		
-		if (n.terminalState /*|| n.move.atkArmy == -1*/) { //simulate ending turn
+		if (n.getTerminalState()/*|| n.move.atkArmy == -1*/) { //simulate ending turn
 			System.out.println();
 			System.out.println();
 			System.out.println("terminal state bakc propogated");
-			backpropogate(n, n.weightedValue(), n.simsCount);
+			backpropogate(n, n.weightedValue(), n.getSimsCount());
 			return;
 		}
-		if (n.children.size() == 0) {
+		if (n.getChildren().size() == 0) {
 			//System.out.println("EXPANDING: " + n.getClass());
 			n.generateChildren();
 		}
 	}
 	
 	private void simulate(Node n) {
-		for (Node ni : n.children) {
-			if (ni.simsCount < 1) {
+		for (Node ni : n.getChildren()) {
+			if (ni.getSimsCount() < 1) {
 				//System.out.println("SIMULATING: " + ni.getClass());
 				ni.generateChildren();
-				backpropogate(ni,ni.weightedValue(),ni.simsCount);
+				backpropogate(ni,ni.weightedValue(),ni.getSimsCount());
 				return;
 			}
 		}
-		if (n.children.size() != 0) {
-			n.isExpanded = true;
+		if (n.getChildren().size() != 0) {
+			n.setIsExpanded(true);
 		}
 	}
 
 	private void backpropogate(Node n, double weightedValueTotal, int noOfNewSims) {
-		n.simsCount += noOfNewSims;
-		n.totalChildValue += weightedValueTotal;
-		if (n.parent != null) backpropogate(n.parent, weightedValueTotal, noOfNewSims);
+		int simsCount = n.getSimsCount();
+		double totalChildValue = n.getTotalChildValue();
+		Node parent = n.getParent();
+		
+		n.setSimsCount(simsCount + noOfNewSims);
+		n.setTotalChildValue(totalChildValue + weightedValueTotal); 
+	
+		if (parent != null) backpropogate(parent, weightedValueTotal, noOfNewSims);
 	}
 
 	
