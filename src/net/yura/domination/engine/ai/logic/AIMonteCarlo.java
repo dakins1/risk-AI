@@ -18,36 +18,29 @@ public class AIMonteCarlo {
 		this.player = this.game.getCurrentPlayer();
 	}
 	
-	public void testing() {
-		GameNode root = new GameNode(game);
-		int x = (int) ((int) 2*0.2);
-		System.out.println("Testing ints: " + x);
-		System.out.println("ai.testing beginning");
-		root.generateChildren();
-	}
-	
 	public String getMove() {
 		GameNode root = new GameNode(game);
 		if (root.getTerminalState()) {
 			return "endattack";
 		}
-		for (int i=0; i<150; i++) {
-			MCTSLoop(root);
-
-			for (Node ni : root.getChildren()) {
-				Move move = ni.getMove();
-				if (move.atkArmy == -1) System.out.println("End turn node " + ni.weightedValueWithSim());
-			}
+		for (int i=0; i<250; i++) {
+			MCTSLoop(root);			
 		}
+
+		//get rid of endattack node cuz it always has highest score
+		root.eliminateEndAttackNode();
 		
-		Move bestWinChildMove = root.bestWinChild().getMove();
+//		System.out.println("Chosen one: " + root.bestWinChild().getTotalChildValue() + "/" + root.bestWinChild().getSimsCount());
+//		System.out.println("Prob of win: " + root.bestWinChild().probOfWin());	
+		//if the best move is a bad move, end attacking phase
 		
-		if (bestWinChildMove.atkArmy == -1) {
+		if (root.bestWinChild().probOfWin() < .30) {
 			return "endattack";
+		} else {
+			Move bestWinChildMove = root.bestWinChild().getMove();
+			return "attack " + bestWinChildMove.attacker.getColor() + " " + bestWinChildMove.defender.getColor(); 			
 		}
-		
-		return "attack " + bestWinChildMove.attacker.getColor() + " " + bestWinChildMove.defender.getColor(); 
-
+	
 	}
 	
 	private void MCTSLoop(GameNode root) {
@@ -64,9 +57,6 @@ public class AIMonteCarlo {
 	
 	private void expand(Node n) {		
 		if (n.getTerminalState()/*|| n.move.atkArmy == -1*/) { //simulate ending turn
-			System.out.println();
-			System.out.println();
-			System.out.println("terminal state bakc propogated");
 			backpropogate(n, n.weightedValue(), n.getSimsCount());
 			return;
 		}

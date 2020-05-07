@@ -13,7 +13,7 @@ import net.yura.domination.engine.core.StatType;
 import net.yura.domination.engine.core.Statistic;
 
 
-public class AIHeuristic {
+public class AIHeuristic implements Heuristic {
 	
 	// TODO possible give regular troops within owned continents more points than regular troops on un-owned continents? 
 	//		maybe not, since that kind of punishes expansion 
@@ -30,7 +30,7 @@ public class AIHeuristic {
 	int ownedBorderScale = 2;
 	int borderScale = 1;
 	int ownedContinentExp = 4;
-	int ownedCountriesScale = 4;
+	int ownedCountriesScale = 10;
 	int cardScale = 2;
 	RiskGame game;
 	Player player;
@@ -41,7 +41,7 @@ public class AIHeuristic {
 		
 	}
 	
-	int getRating() {
+	public double getRating() {
 		int total = 0;
 		total += player.getNoTerritoriesOwned() * ownedCountriesScale;
 		total += continentOwnershipRating();
@@ -49,7 +49,7 @@ public class AIHeuristic {
 		total += borderStrengthRating();
 		total += genericTroopRating();
 		total += cardRating();
-		return total;
+		return total / 100;
 	}
 	
 	int continentOwnershipRating() {

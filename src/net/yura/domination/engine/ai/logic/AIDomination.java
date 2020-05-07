@@ -2074,7 +2074,13 @@ public class AIDomination extends AISubmissive {
 		AIMonteCarlo ai = new AIMonteCarlo(game, player);
 		eliminating = false;
 		breaking = null;
-		return ai.getMove();
+		if (this.player.getName().equals("bob")) { 
+			System.out.println(this.player.getName());
+			System.out.println("Returning ai.getMove()");
+			return ai.getMove();
+		} else {
+			return plan(true);
+		}
 	}
 
 	/**

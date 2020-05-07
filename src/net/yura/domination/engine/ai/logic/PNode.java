@@ -36,6 +36,14 @@ public class PNode extends Node {
 		this.setSimsCount(0);
 	}
 
+	public double probOfWin() {
+		for (int i=0; i<this.getChildren().size(); i++) {
+			if (this.getChildren().get(i).getMove().atkArmy == 0) {
+				return (1.0 - this.getChildren().get(i).getProb());
+			}
+		} 
+		return .99;
+	}
 
 	public void generateChildren() {
 		Move move = this.getMove();
@@ -109,7 +117,7 @@ public class PNode extends Node {
 		
 		int[] outcomesArr = {0,0,0,0,0, 0};
 		
-		int numOfSimulations = 100000;
+		int numOfSimulations = 10000;
 		
 		for (int i = 0; i < numOfSimulations; i++) {		
 			

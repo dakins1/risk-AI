@@ -66,47 +66,47 @@ public class AIManager {
             switch ( game.getState() ) {
                     case RiskGame.STATE_TRADE_CARDS:	{
                     	output = usethisAI.getTrade(); 
-                    	System.out.println("getTrade() = " + output);
+//                    	System.out.println("getTrade() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_PLACE_ARMIES:	{
                     	output = usethisAI.getPlaceArmies(); 
-                    	System.out.println("getPlaceArmies() = " + output);
+//                    	System.out.println("getPlaceArmies() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_ATTACKING:	{
                     	output = usethisAI.getAttack();  
-                    	System.out.println("getAttack() = " + output);
+//                    	System.out.println("getAttack() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_ROLLING:	{
                     	output = usethisAI.getRoll();  
-                    	System.out.println("getRoll() = " + output);
+//                    	System.out.println("getRoll() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_BATTLE_WON:	{
                     	output = usethisAI.getBattleWon();  
-                    	System.out.println("getBattleWon() = " + output);
+//                    	System.out.println("getBattleWon() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_FORTIFYING:	{
                     	output = usethisAI.getTacMove();  
-                    	System.out.println("getTacMove() = " + output);
+//                    	System.out.println("getTacMove() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_SELECT_CAPITAL:	{
                     	output = usethisAI.getCapital();  
-                    	System.out.println("getCapital() = " + output);
+//                    	System.out.println("getCapital() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_DEFEND_YOURSELF: {
                     	output = usethisAI.getAutoDefendString();  
-                    	System.out.println("getAutoDefendString() = " + output);
+//                    	System.out.println("getAutoDefendString() = " + output);
                     	break;
                     }
                     case RiskGame.STATE_END_TURN:	{
                     	output = "endgo";  
-                    	System.out.println("STATE_END_TURN = " + output);
+//                    	System.out.println("STATE_END_TURN = " + output);
                     	break;
                     }
 

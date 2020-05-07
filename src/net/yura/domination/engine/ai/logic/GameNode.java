@@ -13,54 +13,36 @@ import net.yura.domination.engine.core.RiskGame;
 
 public class GameNode extends Node {
 
-	// TODO create the applyMove() function
-	// TODO add probability features
-	// TODO test
-	//		so far i've tested creating a node and adding children, and that all works
-	
-	
 	public RiskGame game; //the resulting board/game state of move
 	public Player player;
-	//the move made that created this board/game state
-//	public double[] strengths = { .2, .4, .6, .8, 1.0 };
 	public double[] strengths = { 1.0 };
 	
 	public GameNode(RiskGame game) { //for when this is root node
-
 		this.game = game;
 		this.player = this.game.getCurrentPlayer();
-		
 		if (game.checkPlayerWon() || getPossibleMoves().size() == 0) {
 			this.setTerminalState(true);
 		} else {
 			this.setTerminalState(false);
 		}
-		
 		this.setSimsCount(0);
 		this.setHeuristic(new AIHeuristic(this.game, this.player).getRating());
 		this.setTerminalState(false);
 		this.setIsExpanded(false);
 		this.setChildren(new ArrayList<Node>());
 		this.setTotalChildValue(0);
-
-		//isVisited = false;
 	}
 	
 	public GameNode(RiskGame game, Move move, PNode parent) {
 		this.game = cloneGame(game);
 		this.player = this.game.getCurrentPlayer();
-		
 		this.setMove(move);
-		
 		copyCountriesToMove(this.game, this.getMove());
 		applyMove(this.game, this.getMove());
 		
-	
 		this.setParent(parent);
 		this.setSimsCount(1);
 		this.setHeuristic(new AIHeuristic(this.game, this.player).getRating());
-		if (move.atkArmy == -1) System.out.println("End node created, heuristic" + this.getHeuristic());
-		
 		if (game.checkPlayerWon() || getPossibleMoves().size() == 0 || move.atkArmy == -1) {
 			this.setTerminalState(true);
 		} else {
@@ -79,13 +61,11 @@ public class GameNode extends Node {
 			return;
 		} else if (m.atkArmy == 0) { //simulating a loss
 			m.attacker.removeArmies(m.originalAtkArmy); 
-			//possibly add something for defending army, but only for later heuristics
 		} else { //simulating victory
 			m.defender.removeArmies(m.defender.getArmies());
 			m.defender.setOwner(m.attacker.getOwner()); //transferring ownership to attacker
 			m.defender.addArmies(m.atkArmy);
 			m.attacker.removeArmies(m.atkArmy);
-			// TODO add something that keeps track of cards maybe?
 		}
 	}
 	
@@ -128,7 +108,6 @@ public class GameNode extends Node {
 	
 	private RiskGame cloneGame(RiskGame gameToClone) { 
 		RiskGame copy = null;
-		//perhaps we shouldn't catch this exception, so we really know when a copy hasn't been made. 
 		try {
 			return gameToClone.deepCopy();
 		} catch (Exception e) {
@@ -141,7 +120,7 @@ public class GameNode extends Node {
 	
 	public double weightedValue() {
 		int simsCount = this.getSimsCount();
-		int heuristic = this.getHeuristic();
+		double heuristic = this.getHeuristic();
 		double prob = this.getProb();
 		double totalChildValue = this.getTotalChildValue();
 		if (simsCount == 0) return 0.0;
@@ -150,7 +129,7 @@ public class GameNode extends Node {
 	
 	public double weightedValueWithSim() {
 		int simsCount = this.getSimsCount();
-		int heuristic = this.getHeuristic();
+		double heuristic = this.getHeuristic();
 		double prob = this.getProb();
 		double totalChildValue = this.getTotalChildValue();
 		if (simsCount == 0) return 0.0;
@@ -158,14 +137,12 @@ public class GameNode extends Node {
 	}
 	
 	public double ucb() {
-		//if (game.checkPlayerWon() || getPossibleMoves().size() == 0) return -1;
 		int simsCount = this.getSimsCount();
 		Node parent = this.getParent();
 		
 		if (simsCount == 0 || parent == null) return Double.MAX_VALUE; 
 		else {
 			int c = 3; //set to 3 based off slides
-			// TODO change this math to probability
 			return weightedValueWithSim() + (c * Math.sqrt(2 * Math.log(parent.getSimsCount()) / simsCount));
 		} 
 	}

@@ -18,7 +18,16 @@ public abstract class Node implements Comparable<Node> {
 	private double totalChildValue;
 	private boolean isVisited;
 	private Move move;
-	private int heuristic;
+	private double heuristic;
+	
+	public void eliminateEndAttackNode() {
+		int dirtyBoy = 0;
+		for (Node n : children){
+			if (n.move.atkArmy == -1) break;
+			dirtyBoy++;
+		}
+		children.remove(dirtyBoy);
+	}
 	
 	@Override 
 	public int compareTo(Node n2) {
@@ -89,11 +98,11 @@ public abstract class Node implements Comparable<Node> {
 		this.move = m;
 	}
 	
-	public int getHeuristic() {
+	public double getHeuristic() {
 		return this.heuristic;
 	}
 	
-	public void setHeuristic(int h) {
+	public void setHeuristic(double h) {
 		this.heuristic = h;
 	}
 	
